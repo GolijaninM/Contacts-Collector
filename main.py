@@ -7,8 +7,8 @@ import pandas
 import json
 
 #INSERT STATE AND BUSINESS NAME
-STATE="Illinois"
-BUSINESS="Truck repair"
+STATE="State Name"
+BUSINESS="Business Name"
 
 
 load_dotenv()
