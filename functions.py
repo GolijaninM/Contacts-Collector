@@ -46,7 +46,7 @@ def extract_email_from_page(url, use_selenium=False):
 
             for _ in range(3):
                 driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
-                time.sleep(1)
+                time.sleep(0.8)
 
             page_source = driver.page_source  # Get full loaded page HTML
             driver.quit()
@@ -73,7 +73,7 @@ def find_contact_page(base_url):
 
         for a in soup.find_all("a", href=True):
             link = a["href"].lower()
-            if "contact" in link or "about" in link or "contact us" in link:
+            if "contact" in link or "about" in link or "contact-us" in link or "contact us" in link:
                 return urljoin(base_url, a["href"])
         return None
     except requests.exceptions.RequestException:
