@@ -20,7 +20,7 @@ Searches businesses in a U.S. state with Google Places and exports contact data 
 Install dependencies:
 
 ```bash
-pip install requests python-dotenv pandas selenium beautifulsoup4
+pip install -r requirements.txt
 ```
 
 ## Setup
