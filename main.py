@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import time
 import functions
 import pandas
+import json
 
 #INSERT STATE AND BUSINESS NAME
 STATE="Illinois"
@@ -14,20 +15,25 @@ load_dotenv()
 API_KEY=os.getenv("PLACES_API_KEY")
 
 URL = f"https://maps.googleapis.com/maps/api/place/textsearch/json"
+try:
+    with open(f"{STATE} ids.json") as file:
+        file_data=json.load(file)
+        place_ids=file_data["ids"]
+except FileNotFoundError:
+    place_ids=[]
 
-results=[]
-
+new_ids=[]
 company_city=[]
 company_name=[]
 company_web_url=[]
 company_phone_num=[]
 company_email=[]
-company_has_form=[]
 
 
 cities=functions.get_cities(STATE)
 
-for city in cities[:1]:
+
+for city in cities:
     QUERY=city+" "+BUSINESS
     params = {
         "query": QUERY,
@@ -39,9 +45,11 @@ for city in cities[:1]:
 
     while True:
         for item in data["results"]:
-            if item not in results:
+            if item["place_id"] not in place_ids:
                 company_city.append(city)
-                results.append(item)
+                company_name.append(item["name"])
+                place_ids.append(item["place_id"])
+                new_ids.append(item["place_id"])
 
         next_page_token=data.get("next_page_token")
 
@@ -53,10 +61,11 @@ for city in cities[:1]:
         else:
             break
 
-for result in results[:5]:
-    company_name.append(result["name"])
-
-    place_id=result["place_id"]
+i=1
+for id_ in new_ids:
+    print(f"{i} / {len(new_ids)}")
+    i+=1
+    place_id=id_
     details_url=f"https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&fields=formatted_phone_number,website&key={API_KEY}"
     details_response=requests.get(details_url)
     details_data=details_response.json()
@@ -71,12 +80,19 @@ for result in results[:5]:
     company_email.append(email)
 
 table={
-    # "City":company_city,
+    "City":company_city,
     "Name":company_name,
     "Website":company_web_url,
     "Phone number":company_phone_num,
     "Email":company_email,
 }
+
+output_json={
+    "ids":place_ids
+}
+
+with open(f"{STATE} ids.json","w") as file:
+    json.dump(output_json,file)
 
 data_table=pandas.DataFrame(table)
 data_table.to_csv(f"{STATE} {BUSINESS}.csv",index=False)
